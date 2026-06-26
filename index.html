@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0071e3" />
+  <meta name="description" content="Jupyter-like PWA for authoring AI-agent specs with Markdown, PlantUML and JavaScript" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="mobileUML" />
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon-192.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.svg" />
+  <link rel="stylesheet" href="./css/styles.css" />
+
+  <title>mobileUML</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "marked":     "https://esm.sh/marked@12",
+      "dompurify":  "https://esm.sh/dompurify@3",
+      "pako":       "https://esm.sh/pako@2"
+    }
+  }
+  </script>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Main toolbar ────────────────────────────── -->
+  <header id="toolbar">
+    <button id="btn-sidebar" class="btn" title="Toggle sidebar" aria-label="Toggle sidebar">☰</button>
+
+    <input id="doc-title" type="text" placeholder="Document title" aria-label="Document title" />
+
+    <button id="btn-new" class="btn" title="New document">
+      <span>＋</span><span class="btn-label"> New</span>
+    </button>
+    <button id="btn-import" class="btn" title="Import .json notebook">
+      <span>⬆</span><span class="btn-label"> Import</span>
+    </button>
+    <button id="btn-export" class="btn" title="Export .json notebook">
+      <span>⬇</span><span class="btn-label"> Export</span>
+    </button>
+    <button id="btn-reset-js" class="btn" title="Reset JavaScript sandbox (clears global scope)">
+      <span>↺</span><span class="btn-label"> Reset JS</span>
+    </button>
+  </header>
+
+  <!-- ── Body ─────────────────────────────────────── -->
+  <div id="main">
+
+    <!-- Sidebar -->
+    <nav id="sidebar" aria-label="Documents">
+      <div id="sidebar-header">
+        <span>Documents</span>
+      </div>
+      <div id="doc-list" role="list"></div>
+    </nav>
+
+    <!-- Sidebar overlay (mobile) -->
+    <div id="sidebar-overlay" role="presentation"></div>
+
+    <!-- Notebook area -->
+    <main id="notebook-area">
+      <div id="notebook" role="list" aria-label="Notebook cells"></div>
+
+      <!-- Add cell bar -->
+      <div id="add-cell-bar" aria-label="Add cell">
+        <button id="btn-add-md"  class="btn btn-add-md"  title="Add Markdown cell">＋ Markdown</button>
+        <button id="btn-add-uml" class="btn btn-add-uml" title="Add PlantUML cell">＋ PlantUML</button>
+        <button id="btn-add-js"  class="btn btn-add-js"  title="Add JavaScript cell">＋ JavaScript</button>
+      </div>
+    </main>
+
+  </div><!-- #main -->
+</div><!-- #app -->
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>

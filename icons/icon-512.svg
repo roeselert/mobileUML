@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#0071e3"/>
+  <rect x="96" y="100" width="320" height="90" rx="12" fill="white"/>
+  <text x="256" y="160" font-family="system-ui,sans-serif" font-size="44" font-weight="700" fill="#0071e3" text-anchor="middle">UML</text>
+  <rect x="96" y="208" width="320" height="204" rx="12" fill="none" stroke="white" stroke-width="10"/>
+  <line x1="96" y1="276" x2="416" y2="276" stroke="white" stroke-width="10"/>
+  <rect x="130" y="294" width="148" height="12" rx="6" fill="white" opacity="0.8"/>
+  <rect x="130" y="328" width="192" height="12" rx="6" fill="white" opacity="0.8"/>
+  <rect x="130" y="362" width="116" height="12" rx="6" fill="white" opacity="0.8"/>
+</svg>
