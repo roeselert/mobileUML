@@ -1,14 +1,18 @@
-export function exportNotebook(doc) {
-  const json = JSON.stringify(doc.notebook, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
+function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${(doc.name || 'notebook').replace(/[^\w\-. ]/g, '_')}.json`;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+export function exportNotebook(doc) {
+  const json = JSON.stringify(doc.notebook, null, 2);
+  const safe = (doc.name || 'notebook').replace(/[^\w\-. ]/g, '_');
+  triggerDownload(new Blob([json], { type: 'application/json' }), `${safe}.json`);
 }
 
 export function exportMarkdown(doc) {
@@ -28,16 +32,8 @@ export function exportMarkdown(doc) {
     }
   }
 
-  const md = lines.join('\n');
-  const blob = new Blob([md], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${(title).replace(/[^\w\-. ]/g, '_')}.md`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const safe = title.replace(/[^\w\-. ]/g, '_');
+  triggerDownload(new Blob([lines.join('\n')], { type: 'text/markdown' }), `${safe}.md`);
 }
 
 export function importNotebook() {

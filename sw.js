@@ -1,4 +1,4 @@
-const CACHE = 'mobileuml-v1';
+const CACHE = 'mobileuml-v2';
 
 const SHELL = [
   './',
