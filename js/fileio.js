@@ -11,6 +11,35 @@ export function exportNotebook(doc) {
   URL.revokeObjectURL(url);
 }
 
+export function exportMarkdown(doc) {
+  const lines = [];
+  const title = doc.name || 'Untitled';
+  lines.push(`# ${title}`, '');
+
+  for (const cell of doc.notebook.cells) {
+    const src = cell.source.trimEnd();
+    if (!src) continue;
+    if (cell.type === 'markdown') {
+      lines.push(src, '');
+    } else if (cell.type === 'plantuml') {
+      lines.push('```plantuml', src, '```', '');
+    } else if (cell.type === 'javascript') {
+      lines.push('```javascript', src, '```', '');
+    }
+  }
+
+  const md = lines.join('\n');
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${(title).replace(/[^\w\-. ]/g, '_')}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export function importNotebook() {
   return new Promise(resolve => {
     const input = document.createElement('input');

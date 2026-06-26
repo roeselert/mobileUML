@@ -1,7 +1,7 @@
 import * as store from './store.js';
 import * as nb from './notebook.js';
 import { createCell } from './cell.js';
-import { exportNotebook, importNotebook } from './fileio.js';
+import { exportNotebook, exportMarkdown, importNotebook } from './fileio.js';
 import { reset as resetSandbox } from './sandbox.js';
 
 let saveTimer = null;
@@ -18,6 +18,7 @@ async function init() {
   document.getElementById('btn-new').addEventListener('click', newDoc);
   document.getElementById('btn-import').addEventListener('click', importDoc);
   document.getElementById('btn-export').addEventListener('click', exportDoc);
+  document.getElementById('btn-export-md').addEventListener('click', exportDocMd);
   document.getElementById('btn-reset-js').addEventListener('click', () => {
     resetSandbox();
     showToast('Sandbox reset');
@@ -93,6 +94,12 @@ async function exportDoc() {
   const doc = nb.getDoc();
   if (!doc) { alert('No document loaded.'); return; }
   exportNotebook(doc);
+}
+
+async function exportDocMd() {
+  const doc = nb.getDoc();
+  if (!doc) { alert('No document loaded.'); return; }
+  exportMarkdown(doc);
 }
 
 async function importDoc() {
