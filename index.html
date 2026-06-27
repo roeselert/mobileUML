@@ -20,9 +20,16 @@
   <script type="importmap">
   {
     "imports": {
-      "marked":     "https://esm.sh/marked@12",
-      "dompurify":  "https://esm.sh/dompurify@3",
-      "pako":       "https://esm.sh/pako@2"
+      "marked":                      "https://esm.sh/marked@12",
+      "dompurify":                   "https://esm.sh/dompurify@3",
+      "pako":                        "https://esm.sh/pako@2",
+      "@codemirror/state":           "https://esm.sh/@codemirror/state@6",
+      "@codemirror/view":            "https://esm.sh/@codemirror/view@6",
+      "@codemirror/commands":        "https://esm.sh/@codemirror/commands@6",
+      "@codemirror/language":        "https://esm.sh/@codemirror/language@6",
+      "@codemirror/lang-javascript": "https://esm.sh/@codemirror/lang-javascript@6",
+      "@codemirror/lang-markdown":   "https://esm.sh/@codemirror/lang-markdown@6",
+      "@codemirror/theme-one-dark":  "https://esm.sh/@codemirror/theme-one-dark@6"
     }
   }
   </script>
@@ -43,14 +50,30 @@
       <span>⬆</span><span class="btn-label"> Import</span>
     </button>
     <button id="btn-export" class="btn" title="Export .json notebook">
-      <span>⬇</span><span class="btn-label"> Export JSON</span>
+      <span>⬇</span><span class="btn-label"> JSON</span>
     </button>
     <button id="btn-export-md" class="btn" title="Export as Markdown (.md)">
-      <span>⬇</span><span class="btn-label"> Export MD</span>
+      <span>⬇</span><span class="btn-label"> MD</span>
     </button>
     <button id="btn-reset-js" class="btn" title="Reset JavaScript sandbox (clears global scope)">
       <span>↺</span><span class="btn-label"> Reset JS</span>
     </button>
+
+    <span class="toolbar-sep" aria-hidden="true"></span>
+
+    <label for="editor-font-size" class="toolbar-label">Size</label>
+    <select id="editor-font-size" title="Editor font size" aria-label="Editor font size">
+      <option value="11">11px</option>
+      <option value="12">12px</option>
+      <option value="13">13px</option>
+      <option value="14">14px</option>
+      <option value="15">15px</option>
+      <option value="16">16px</option>
+      <option value="18">18px</option>
+      <option value="20">20px</option>
+    </select>
+
+    <button id="btn-wrap" class="btn" title="Toggle line wrap">↵ Wrap</button>
   </header>
 
   <!-- ── Body ─────────────────────────────────────── -->

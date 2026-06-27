@@ -1,7 +1,7 @@
+import { createEditor } from './cm-editor.js';
 import { render as renderMarkdown } from './markdown.js';
 import { getUrl as plantumlUrl } from './plantuml.js';
 import { runCode } from './sandbox.js';
-import { attachEditor } from './editor.js';
 
 function btn(label, title, cls = '') {
   const b = document.createElement('button');
@@ -10,17 +10,6 @@ function btn(label, title, cls = '') {
   b.title = title;
   return b;
 }
-
-function autoGrow(ta) {
-  ta.style.height = 'auto';
-  ta.style.height = ta.scrollHeight + 'px';
-}
-
-const PLACEHOLDER = {
-  markdown: '# Heading\n\nWrite **Markdown** here…',
-  plantuml: '@startuml\nAlice -> Bob: Hello\n@enduml',
-  javascript: '// JavaScript\nconsole.log("Hello, world!");',
-};
 
 export function createCell(cellData, callbacks) {
   const el = document.createElement('div');
@@ -46,33 +35,29 @@ export function createCell(cellData, callbacks) {
   const spacer = document.createElement('span');
   spacer.className = 'cell-toolbar-spacer';
 
-  const upBtn    = btn('↑', 'Move up');
-  const downBtn  = btn('↓', 'Move down');
-  const dupBtn   = btn('⎘', 'Duplicate (Ctrl+D)');
-  const delBtn   = btn('✕', 'Delete', 'btn-danger');
+  const upBtn   = btn('↑', 'Move up');
+  const downBtn = btn('↓', 'Move down');
+  const dupBtn  = btn('⎘', 'Duplicate (Ctrl+D)');
+  const delBtn  = btn('✕', 'Delete', 'btn-danger');
 
   toolbar.append(typeBadge, runBtn, spacer, upBtn, downBtn, dupBtn, delBtn);
 
-  // ── Textarea ─────────────────────────────────────────
-  const ta = document.createElement('textarea');
-  ta.className = 'cell-editor';
-  ta.value = cellData.source;
-  ta.placeholder = PLACEHOLDER[cellData.type] || '';
-  ta.spellcheck = false;
-  ta.autocomplete = 'off';
-  Object.assign(ta, { autocorrect: 'off', autocapitalize: 'none' });
-  ta.rows = 3;
+  // ── Editor container ──────────────────────────────────
+  const editorWrap = document.createElement('div');
+  editorWrap.className = 'cell-editor-wrap';
 
   // ── Output ────────────────────────────────────────────
   const output = document.createElement('div');
   output.className = 'cell-output';
 
-  el.append(toolbar, ta, output);
+  el.append(toolbar, editorWrap, output);
 
-  // ── Rendering ────────────────────────────────────────
+  // execute references editor; define before createEditor so the closure captures it
+  let editor;
+
   async function execute() {
     output.innerHTML = '';
-    const src = ta.value.trim();
+    const src = editor.getValue().trim();
     if (!src) return;
 
     if (cellData.type === 'markdown') {
@@ -95,7 +80,7 @@ export function createCell(cellData, callbacks) {
         e.textContent = 'Failed to render. Check diagram syntax and network connection.';
         output.appendChild(e);
       };
-      img.src = plantumlUrl(ta.value);
+      img.src = plantumlUrl(editor.getValue());
 
     } else if (cellData.type === 'javascript') {
       const log = document.createElement('div');
@@ -103,7 +88,7 @@ export function createCell(cellData, callbacks) {
       output.appendChild(log);
 
       await runCode(
-        ta.value,
+        editor.getValue(),
         ({ level, args }) => {
           const line = document.createElement('div');
           line.className = `log-${level}`;
@@ -121,32 +106,29 @@ export function createCell(cellData, callbacks) {
     }
   }
 
-  // ── Events ────────────────────────────────────────────
-  runBtn.addEventListener('click', execute);
+  // ── Create CM editor ──────────────────────────────────
+  editor = createEditor(editorWrap, {
+    type: cellData.type,
+    source: cellData.source,
+    onChange: text => callbacks.onUpdate(cellData.id, text),
+    onRun: execute,
+    onFocusPrev: () => callbacks.onFocusPrev(cellData.id),
+    onFocusNext: () => callbacks.onFocusNext(cellData.id),
+  });
 
+  // Ctrl+D duplicate event bubbles up from cm-editor.js
+  editorWrap.addEventListener('cell-duplicate', () => callbacks.onDuplicate(cellData.id));
+
+  // ── Toolbar events ────────────────────────────────────
+  runBtn.addEventListener('click',  execute);
   upBtn.addEventListener('click',   () => callbacks.onMoveUp(cellData.id));
   downBtn.addEventListener('click', () => callbacks.onMoveDown(cellData.id));
   dupBtn.addEventListener('click',  () => callbacks.onDuplicate(cellData.id));
   delBtn.addEventListener('click',  () => callbacks.onDelete(cellData.id));
 
-  ta.addEventListener('input', () => {
-    autoGrow(ta);
-    callbacks.onUpdate(cellData.id, ta.value);
-  });
-
-  ta.addEventListener('cell-duplicate', () => callbacks.onDuplicate(cellData.id));
-
-  attachEditor(ta, {
-    onRun: execute,
-    onMoveToAbove: () => callbacks.onFocusPrev(cellData.id),
-    onMoveToBelow: () => callbacks.onFocusNext(cellData.id),
-  });
-
-  // Expose textarea for external focus
-  el._textarea = ta;
-  el._autoGrow = () => autoGrow(ta);
-
-  requestAnimationFrame(() => autoGrow(ta));
+  // ── Expose focus / destroy ────────────────────────────
+  el._focus   = () => editor.focus();
+  el._destroy = () => editor.destroy();
 
   return el;
 }

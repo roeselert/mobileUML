@@ -3,6 +3,7 @@ import * as nb from './notebook.js';
 import { createCell } from './cell.js';
 import { exportNotebook, exportMarkdown, importNotebook } from './fileio.js';
 import { reset as resetSandbox } from './sandbox.js';
+import { getSettings, applyFontSize, applyWrap } from './cm-editor.js';
 
 let saveTimer = null;
 
@@ -35,6 +36,22 @@ async function init() {
 
   // Wire sidebar overlay
   document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+
+  // ── Editor settings ──────────────────────────────────
+  const { fontSize, wrap } = getSettings();
+
+  const fontSizeEl = document.getElementById('editor-font-size');
+  fontSizeEl.value = fontSize;
+  fontSizeEl.addEventListener('change', () => applyFontSize(parseInt(fontSizeEl.value, 10)));
+
+  let wrapOn = wrap;
+  const wrapBtn = document.getElementById('btn-wrap');
+  wrapBtn.classList.toggle('active', wrapOn);
+  wrapBtn.addEventListener('click', () => {
+    wrapOn = !wrapOn;
+    applyWrap(wrapOn);
+    wrapBtn.classList.toggle('active', wrapOn);
+  });
 
   // Model changes → auto-save
   nb.onchange(scheduleAutoSave);
@@ -141,7 +158,7 @@ async function refreshSidebar() {
         } else {
           nb.setDoc(null);
           document.getElementById('doc-title').value = '';
-          document.getElementById('notebook').innerHTML = '';
+          destroyAndClear();
           await refreshSidebar();
           await newDoc();
         }
@@ -170,11 +187,17 @@ function closeSidebar() {
 
 // ── Notebook rendering ──────────────────────────────────
 
-function renderNotebook() {
+function destroyAndClear() {
   const container = document.getElementById('notebook');
+  container.querySelectorAll('.cell').forEach(el => el._destroy?.());
   container.innerHTML = '';
+}
+
+function renderNotebook() {
+  destroyAndClear();
   const doc = nb.getDoc();
   if (!doc) return;
+  const container = document.getElementById('notebook');
   for (const cell of doc.notebook.cells) {
     container.appendChild(createCell(cell, makeCellCallbacks()));
   }
@@ -196,20 +219,15 @@ function makeCellCallbacks() {
   };
 }
 
-function getCellEls() {
-  return [...document.querySelectorAll('.cell')];
-}
-
 function focusCell(id) {
   const el = document.querySelector(`.cell[data-id="${id}"]`);
-  if (el?._textarea) el._textarea.focus();
+  el?._focus?.();
 }
 
 function focusRelative(id, offset) {
-  const cells = getCellEls();
+  const cells = [...document.querySelectorAll('.cell')];
   const idx = cells.findIndex(c => c.dataset.id === id);
-  const target = cells[idx + offset];
-  if (target?._textarea) target._textarea.focus();
+  cells[idx + offset]?._focus?.();
 }
 
 // ── Add cell ────────────────────────────────────────────

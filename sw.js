@@ -1,4 +1,4 @@
-const CACHE = 'mobileuml-v2';
+const CACHE = 'mobileuml-v3';
 
 const SHELL = [
   './',
@@ -13,6 +13,7 @@ const SHELL = [
   './js/plantuml.js',
   './js/sandbox.js',
   './js/fileio.js',
+  './js/cm-editor.js',
   './manifest.webmanifest',
   './icons/icon-192.svg',
   './icons/icon-512.svg',
