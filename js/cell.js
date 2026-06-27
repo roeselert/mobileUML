@@ -162,7 +162,7 @@ export function createCell(cellData, callbacks) {
       output.appendChild(spinner);
 
       try {
-        const resp = await fetch('https://api-inference.huggingface.co/v1/chat/completions', {
+        const resp = await fetch('https://router.huggingface.co/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -171,7 +171,7 @@ export function createCell(cellData, callbacks) {
           body: JSON.stringify({
             model,
             messages: [{ role: 'user', content: src }],
-            max_tokens: 1024,
+            max_tokens: 4048,
           }),
         });
 
