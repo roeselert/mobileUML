@@ -11,6 +11,7 @@
   --type-md: #28a745;
   --type-uml: #007bff;
   --type-js: #fd7e14;
+  --type-ai: #7b2fff;
   --sidebar-w: 220px;
   --toolbar-h: 48px;
   --radius: 8px;
@@ -33,6 +34,7 @@
     --type-md:  #98c379;
     --type-uml: #61afef;
     --type-js:  #e5c07b;
+    --type-ai:  #c678dd;
   }
 }
 
@@ -235,8 +237,48 @@ html, body {
 .cell[data-type="markdown"]   .cell-type-badge { background: var(--type-md); }
 .cell[data-type="plantuml"]   .cell-type-badge { background: var(--type-uml); }
 .cell[data-type="javascript"] .cell-type-badge { background: var(--type-js); }
+.cell[data-type="aichat"]     .cell-type-badge { background: var(--type-ai); }
 
 .cell-toolbar-spacer { flex: 1; }
+
+/* ── AI chat config bar ──────────────────────────────── */
+
+.cell-ai-config {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ai-model-input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.ai-token-input {
+  width: 200px;
+}
+
+.ai-model-input,
+.ai-token-input {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  font-family: var(--font-code);
+  outline: none;
+  height: 30px;
+}
+.ai-model-input:focus,
+.ai-token-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
 
 /* ── CodeMirror editor ───────────────────────────────── */
 
@@ -429,9 +471,11 @@ html, body {
 .btn-add-md  { border-color: var(--type-md);  color: var(--type-md); }
 .btn-add-uml { border-color: var(--type-uml); color: var(--type-uml); }
 .btn-add-js  { border-color: var(--type-js);  color: var(--type-js); }
+.btn-add-ai  { border-color: var(--type-ai);  color: var(--type-ai); }
 .btn-add-md:hover  { background: color-mix(in srgb, var(--type-md)  12%, transparent); }
 .btn-add-uml:hover { background: color-mix(in srgb, var(--type-uml) 12%, transparent); }
 .btn-add-js:hover  { background: color-mix(in srgb, var(--type-js)  12%, transparent); }
+.btn-add-ai:hover  { background: color-mix(in srgb, var(--type-ai)  12%, transparent); }
 
 /* Toolbar buttons (no border) */
 #toolbar .btn {

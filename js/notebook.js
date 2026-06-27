@@ -16,6 +16,7 @@ export function onchange(fn) { _onChange = fn; }
 
 export function addCell(type, atIndex) {
   const cell = { id: genId(), type, source: '' };
+  if (type === 'aichat') cell.config = { model: '', token: '' };
   const cells = _doc.notebook.cells;
   if (atIndex === undefined || atIndex >= cells.length) {
     cells.push(cell);
@@ -46,7 +47,9 @@ export function duplicateCell(id) {
   const cells = _doc.notebook.cells;
   const idx = cells.findIndex(c => c.id === id);
   if (idx === -1) return null;
-  const copy = { id: genId(), type: cells[idx].type, source: cells[idx].source };
+  const orig = cells[idx];
+  const copy = { id: genId(), type: orig.type, source: orig.source };
+  if (orig.config) copy.config = { ...orig.config };
   cells.splice(idx + 1, 0, copy);
   emit();
   return copy;
@@ -55,4 +58,9 @@ export function duplicateCell(id) {
 export function updateSource(id, text) {
   const cell = _doc.notebook.cells.find(c => c.id === id);
   if (cell) { cell.source = text; emit(); }
+}
+
+export function updateConfig(id, config) {
+  const cell = _doc.notebook.cells.find(c => c.id === id);
+  if (cell) { cell.config = { ...config }; emit(); }
 }

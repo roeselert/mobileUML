@@ -33,6 +33,7 @@ async function init() {
   document.getElementById('btn-add-md').addEventListener('click',  () => addCell('markdown'));
   document.getElementById('btn-add-uml').addEventListener('click', () => addCell('plantuml'));
   document.getElementById('btn-add-js').addEventListener('click',  () => addCell('javascript'));
+  document.getElementById('btn-add-ai').addEventListener('click',  () => addCell('aichat'));
 
   // Wire sidebar overlay
   document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
@@ -207,6 +208,7 @@ function makeCellCallbacks() {
     },
     onFocusPrev(id) { focusRelative(id, -1); },
     onFocusNext(id) { focusRelative(id, 1); },
+    onConfigUpdate(id, config) { nb.updateConfig(id, config); },
   };
 }
 

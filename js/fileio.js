@@ -50,7 +50,7 @@ export function importNotebook() {
         if (typeof notebook.version !== 'number' || !Array.isArray(notebook.cells)) {
           throw new Error('Invalid format: expected { version, cells[] }');
         }
-        const validTypes = new Set(['markdown', 'plantuml', 'javascript']);
+        const validTypes = new Set(['markdown', 'plantuml', 'javascript', 'aichat']);
         for (const cell of notebook.cells) {
           if (!cell.id || typeof cell.source !== 'string' || !validTypes.has(cell.type)) {
             throw new Error(`Invalid cell: ${JSON.stringify(cell)}`);

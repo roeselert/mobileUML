@@ -11,6 +11,14 @@ function btn(label, title, cls = '') {
   return b;
 }
 
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+const TYPE_BADGE  = { javascript: 'js', plantuml: 'uml', aichat: 'ai', markdown: 'md' };
+const RUN_LABEL   = { javascript: '▶ Run', aichat: '▶ Ask', markdown: '⟳ Render', plantuml: '⟳ Render' };
+const RUN_TITLE   = { javascript: 'Run (Ctrl+Enter)', aichat: 'Ask AI (Ctrl+Enter)', markdown: 'Render (Ctrl+Enter)', plantuml: 'Render (Ctrl+Enter)' };
+
 export function createCell(cellData, callbacks) {
   const el = document.createElement('div');
   el.className = 'cell';
@@ -23,14 +31,12 @@ export function createCell(cellData, callbacks) {
 
   const typeBadge = document.createElement('span');
   typeBadge.className = 'cell-type-badge';
-  typeBadge.textContent = cellData.type === 'javascript' ? 'js'
-    : cellData.type === 'plantuml' ? 'uml' : 'md';
+  typeBadge.textContent = TYPE_BADGE[cellData.type] || 'md';
 
-  const isJs = cellData.type === 'javascript';
   const runBtn = document.createElement('button');
   runBtn.className = 'btn btn-run';
-  runBtn.textContent = isJs ? '▶ Run' : '⟳ Render';
-  runBtn.title = isJs ? 'Run (Ctrl+Enter)' : 'Render (Ctrl+Enter)';
+  runBtn.textContent = RUN_LABEL[cellData.type] || '▶ Run';
+  runBtn.title = RUN_TITLE[cellData.type] || 'Run (Ctrl+Enter)';
 
   const spacer = document.createElement('span');
   spacer.className = 'cell-toolbar-spacer';
@@ -43,18 +49,60 @@ export function createCell(cellData, callbacks) {
 
   toolbar.append(typeBadge, runBtn, spacer, wrapBtn, upBtn, downBtn, dupBtn, delBtn);
 
-  // ── Editor container ──────────────────────────────────
+  // ── AI config bar (aichat only) ───────────────────────
+  let modelInput = null;
+  let tokenInput = null;
+
+  if (cellData.type === 'aichat') {
+    const configBar = document.createElement('div');
+    configBar.className = 'cell-ai-config';
+
+    modelInput = document.createElement('input');
+    modelInput.type = 'text';
+    modelInput.className = 'ai-model-input';
+    modelInput.placeholder = 'Model ID  (e.g. HuggingFaceH4/zephyr-7b-beta)';
+    modelInput.value = cellData.config?.model || '';
+    modelInput.spellcheck = false;
+    modelInput.autocomplete = 'off';
+
+    tokenInput = document.createElement('input');
+    tokenInput.type = 'password';
+    tokenInput.className = 'ai-token-input';
+    tokenInput.placeholder = 'HF Token  (hf_...)';
+    tokenInput.value = cellData.config?.token || '';
+    tokenInput.autocomplete = 'off';
+
+    const saveConfig = () => callbacks.onConfigUpdate(cellData.id, {
+      model: modelInput.value,
+      token: tokenInput.value,
+    });
+    modelInput.addEventListener('input', saveConfig);
+    tokenInput.addEventListener('input', saveConfig);
+
+    configBar.append(modelInput, tokenInput);
+    el.append(toolbar, configBar);
+  } else {
+    el.appendChild(toolbar);
+  }
+
+  // ── Editor + output ───────────────────────────────────
   const editorWrap = document.createElement('div');
   editorWrap.className = 'cell-editor-wrap';
 
-  // ── Output ────────────────────────────────────────────
   const output = document.createElement('div');
   output.className = 'cell-output';
 
-  el.append(toolbar, editorWrap, output);
+  el.append(editorWrap, output);
 
-  // execute references editor; define before createEditor so the closure captures it
+  // ── Execute / render ──────────────────────────────────
   let editor;
+
+  function showErr(msg) {
+    const d = document.createElement('div');
+    d.className = 'output-error';
+    d.textContent = msg;
+    output.appendChild(d);
+  }
 
   async function execute() {
     output.innerHTML = '';
@@ -76,10 +124,7 @@ export function createCell(cellData, callbacks) {
       img.onload = () => { spinner.remove(); output.appendChild(img); };
       img.onerror = () => {
         spinner.remove();
-        const e = document.createElement('div');
-        e.className = 'output-error';
-        e.textContent = 'Failed to render. Check diagram syntax and network connection.';
-        output.appendChild(e);
+        showErr('Failed to render. Check diagram syntax and network connection.');
       };
       img.src = plantumlUrl(editor.getValue());
 
@@ -104,6 +149,47 @@ export function createCell(cellData, callbacks) {
           log.appendChild(line);
         }
       );
+
+    } else if (cellData.type === 'aichat') {
+      const model = modelInput.value.trim();
+      const token = tokenInput.value.trim();
+      if (!model) { showErr('Enter a Model ID in the cell config.'); return; }
+      if (!token) { showErr('Enter a HuggingFace token (hf_...) in the cell config.'); return; }
+
+      const spinner = document.createElement('div');
+      spinner.className = 'output-spinner';
+      spinner.textContent = `Calling ${model}…`;
+      output.appendChild(spinner);
+
+      try {
+        const resp = await fetch('https://api-inference.huggingface.co/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'user', content: src }],
+            max_tokens: 1024,
+          }),
+        });
+
+        spinner.remove();
+
+        if (!resp.ok) {
+          const errText = await resp.text();
+          showErr(`API error ${resp.status}: ${escHtml(errText)}`);
+          return;
+        }
+
+        const data = await resp.json();
+        const text = data.choices?.[0]?.message?.content ?? JSON.stringify(data, null, 2);
+        output.innerHTML = renderMarkdown(text);
+      } catch (e) {
+        spinner.remove();
+        showErr(`Fetch error: ${e.message}`);
+      }
     }
   }
 
@@ -117,7 +203,6 @@ export function createCell(cellData, callbacks) {
     onFocusNext: () => callbacks.onFocusNext(cellData.id),
   });
 
-  // Ctrl+D duplicate event bubbles up from cm-editor.js
   editorWrap.addEventListener('cell-duplicate', () => callbacks.onDuplicate(cellData.id));
 
   // ── Toolbar events ────────────────────────────────────
@@ -134,7 +219,6 @@ export function createCell(cellData, callbacks) {
     wrapBtn.classList.toggle('active', wrapOn);
   });
 
-  // ── Expose focus / destroy ────────────────────────────
   el._focus   = () => editor.focus();
   el._destroy = () => editor.destroy();
 
