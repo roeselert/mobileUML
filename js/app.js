@@ -3,7 +3,7 @@ import * as nb from './notebook.js';
 import { createCell } from './cell.js';
 import { exportNotebook, exportMarkdown, importNotebook } from './fileio.js';
 import { reset as resetSandbox } from './sandbox.js';
-import { getSettings, applyFontSize, applyWrap } from './cm-editor.js';
+import { getSettings, applyFontSize } from './cm-editor.js';
 
 let saveTimer = null;
 
@@ -38,20 +38,11 @@ async function init() {
   document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
 
   // ── Editor settings ──────────────────────────────────
-  const { fontSize, wrap } = getSettings();
+  const { fontSize } = getSettings();
 
   const fontSizeEl = document.getElementById('editor-font-size');
   fontSizeEl.value = fontSize;
   fontSizeEl.addEventListener('change', () => applyFontSize(parseInt(fontSizeEl.value, 10)));
-
-  let wrapOn = wrap;
-  const wrapBtn = document.getElementById('btn-wrap');
-  wrapBtn.classList.toggle('active', wrapOn);
-  wrapBtn.addEventListener('click', () => {
-    wrapOn = !wrapOn;
-    applyWrap(wrapOn);
-    wrapBtn.classList.toggle('active', wrapOn);
-  });
 
   // Model changes → auto-save
   nb.onchange(scheduleAutoSave);

@@ -23,13 +23,14 @@
       "marked":                      "https://esm.sh/marked@12",
       "dompurify":                   "https://esm.sh/dompurify@3",
       "pako":                        "https://esm.sh/pako@2",
+      "@lezer/highlight":            "https://esm.sh/@lezer/highlight@1",
       "@codemirror/state":           "https://esm.sh/@codemirror/state@6",
       "@codemirror/view":            "https://esm.sh/@codemirror/view@6",
       "@codemirror/commands":        "https://esm.sh/@codemirror/commands@6",
-      "@codemirror/language":        "https://esm.sh/@codemirror/language@6",
-      "@codemirror/lang-javascript": "https://esm.sh/@codemirror/lang-javascript@6",
-      "@codemirror/lang-markdown":   "https://esm.sh/@codemirror/lang-markdown@6",
-      "@codemirror/theme-one-dark":  "https://esm.sh/@codemirror/theme-one-dark@6"
+      "@codemirror/language":        "https://esm.sh/@codemirror/language@6?external=@lezer/highlight",
+      "@codemirror/lang-javascript": "https://esm.sh/@codemirror/lang-javascript@6?external=@lezer/highlight",
+      "@codemirror/lang-markdown":   "https://esm.sh/@codemirror/lang-markdown@6?external=@lezer/highlight",
+      "@codemirror/theme-one-dark":  "https://esm.sh/@codemirror/theme-one-dark@6?external=@lezer/highlight"
     }
   }
   </script>
@@ -72,8 +73,6 @@
       <option value="18">18px</option>
       <option value="20">20px</option>
     </select>
-
-    <button id="btn-wrap" class="btn" title="Toggle line wrap">↵ Wrap</button>
   </header>
 
   <!-- ── Body ─────────────────────────────────────── -->

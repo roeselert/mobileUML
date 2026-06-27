@@ -35,12 +35,13 @@ export function createCell(cellData, callbacks) {
   const spacer = document.createElement('span');
   spacer.className = 'cell-toolbar-spacer';
 
+  const wrapBtn = btn('↵', 'Toggle line wrap for this cell');
   const upBtn   = btn('↑', 'Move up');
   const downBtn = btn('↓', 'Move down');
   const dupBtn  = btn('⎘', 'Duplicate (Ctrl+D)');
   const delBtn  = btn('✕', 'Delete', 'btn-danger');
 
-  toolbar.append(typeBadge, runBtn, spacer, upBtn, downBtn, dupBtn, delBtn);
+  toolbar.append(typeBadge, runBtn, spacer, wrapBtn, upBtn, downBtn, dupBtn, delBtn);
 
   // ── Editor container ──────────────────────────────────
   const editorWrap = document.createElement('div');
@@ -125,6 +126,13 @@ export function createCell(cellData, callbacks) {
   downBtn.addEventListener('click', () => callbacks.onMoveDown(cellData.id));
   dupBtn.addEventListener('click',  () => callbacks.onDuplicate(cellData.id));
   delBtn.addEventListener('click',  () => callbacks.onDelete(cellData.id));
+
+  let wrapOn = false;
+  wrapBtn.addEventListener('click', () => {
+    wrapOn = !wrapOn;
+    editor.setWrap(wrapOn);
+    wrapBtn.classList.toggle('active', wrapOn);
+  });
 
   // ── Expose focus / destroy ────────────────────────────
   el._focus   = () => editor.focus();
